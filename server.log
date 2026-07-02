@@ -1,0 +1,152 @@
+
+> github-variety@1.0.0 dev
+> nodemon src/index.js
+
+[33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+GitHub Variety backend running on port 3000
+POST /app/installations/143731174/access_tokens - 401 with id CC0B:200CF:19B498:1A9765:6A450C15 in 503ms
+GET /repos/najiullahrao/github-variety-test/labels/bug - 401 with id CC0B:200CF:19B498:1A9765:6A450C15 in 513ms
+GitHub issue creation failed: RequestError [HttpError]: Bad credentials - https://docs.github.com/rest
+    at fetchWrapper (file:///C:/Users/ADMIN/Desktop/github-variety/node_modules/@octokit/request/dist-bundle/index.js:124:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async hook (file:///C:/Users/ADMIN/Desktop/github-variety/node_modules/@octokit/auth-app/dist-node/index.js:369:18)
+    at async getInstallationAuthenticationImpl (file:///C:/Users/ADMIN/Desktop/github-variety/node_modules/@octokit/auth-app/dist-node/index.js:248:7)
+    at async hook (file:///C:/Users/ADMIN/Desktop/github-variety/node_modules/@octokit/auth-app/dist-node/index.js:398:32)
+    at async ensureLabelsExist (C:\Users\ADMIN\Desktop\github-variety\src\services\githubService.js:25:7)
+    at async Object.createIssue (C:\Users\ADMIN\Desktop\github-variety\src\services\githubService.js:59:3)
+    at async submitFeedback (C:\Users\ADMIN\Desktop\github-variety\src\controllers\feedbackController.js:36:31) {
+  status: 401,
+  request: {
+    method: 'POST',
+    url: 'https://api.github.com/app/installations/143731174/access_tokens',
+    headers: {
+      accept: 'application/vnd.github.v3+json',
+      'user-agent': 'octokit-rest.js/22.0.1 octokit-rest.js/22.0.1 octokit-core.js/7.0.6 Node.js/24',
+      authorization: 'bearer [REDACTED]'
+    },
+    request: { hook: [Function: bound bound register] }
+  },
+  response: {
+    url: 'https://api.github.com/app/installations/143731174/access_tokens',
+    status: 401,
+    headers: {
+      'access-control-allow-origin': '*',
+      'access-control-expose-headers': 'ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset',
+      connection: 'close',
+      'content-security-policy': "default-src 'none'",
+      'content-type': 'application/json; charset=utf-8',
+      date: 'Wed, 01 Jul 2026 12:46:13 GMT',
+      'referrer-policy': 'origin-when-cross-origin, strict-origin-when-cross-origin',
+      server: 'github.com',
+      'strict-transport-security': 'max-age=31536000; includeSubdomains; preload',
+      vary: 'Accept-Encoding, Accept, X-Requested-With',
+      'x-content-type-options': 'nosniff',
+      'x-frame-options': 'deny',
+      'x-github-media-type': 'github.v3; format=json',
+      'x-github-request-id': 'CC0B:200CF:19B498:1A9765:6A450C15',
+      'x-xss-protection': '0'
+    },
+    data: {
+      message: 'Bad credentials',
+      documentation_url: 'https://docs.github.com/rest',
+      status: '401'
+    }
+  },
+  [cause]: undefined
+}
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ⌘ suppress logs { quiet: true }
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+GitHub Variety backend running on port 3000
+[@octokit/request] "POST https://api.github.com/repos/najiullahrao/github-variety-test/issues" is deprecated. It is scheduled to be removed on Fri, 10 Mar 2028 00:00:00 GMT. See https://docs.github.com/en/rest/about-the-rest-api/api-versions
+[@octokit/request] "POST https://api.github.com/repos/najiullahrao/github-variety-test/issues" is deprecated. It is scheduled to be removed on Fri, 10 Mar 2028 00:00:00 GMT. See https://docs.github.com/en/rest/about-the-rest-api/api-versions
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ⌘ override existing { override: true }
+GitHub Variety backend running on port 3000
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ⌘ enable debugging { debug: true }
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+[32m[nodemon] restarting due to changes...[39m
+◇ injected env (6) from .env // tip: ⌘ suppress logs { quiet: true }
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+GitHub Variety backend running on port 3000
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ⌘ enable debugging { debug: true }
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+GitHub Variety backend running on port 3000
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ⌘ override existing { override: true }
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ⌘ enable debugging { debug: true }
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node src/index.js`[39m
+◇ injected env (6) from .env // tip: ⌘ enable debugging { debug: true }
+GitHub Variety backend running on port 3000
+[32m[nodemon] clean exit - waiting for changes before restart[39m

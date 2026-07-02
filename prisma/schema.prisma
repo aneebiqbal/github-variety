@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id              String      @id @default(cuid())
+  name            String
+  projectKey      String      @unique
+  githubOwner     String
+  githubRepo      String
+  installationId  String
+  isActive        Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  feedbacks       Feedback[]
+}
+
+model Feedback {
+  id                String          @id @default(cuid())
+  projectId         String
+  project           Project         @relation(fields: [projectId], references: [id])
+  reporterName      String
+  title             String
+  description       String
+  pageUrl            String
+  screenshotUrl     String?
+  userAgent         String
+  githubIssueUrl    String?
+  githubIssueNumber Int?
+  status            FeedbackStatus  @default(PENDING)
+  createdAt         DateTime        @default(now())
+}
+
+enum FeedbackStatus {
+  PENDING
+  CREATED
+  FAILED
+}

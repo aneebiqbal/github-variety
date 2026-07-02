@@ -42,7 +42,7 @@
   var html2canvasLoading = false;
   var screenshotData = null; // base64 string (no data: prefix) or null
   var screenshotCaptured = false; // whether capture has been attempted/succeeded for current open
-  var captureIndicatorEl = null;
+  var captureIndicatorEl = null; 
 
   // --- Inject scoped CSS ---
   var styleEl = document.createElement('style');

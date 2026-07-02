@@ -6,3 +6,6 @@ node_modules
 
 # Local-only test file (not for version control)
 test.html
+
+# Throwaway diagnostic scripts (not for version control)
+scripts/check-repo-state.js

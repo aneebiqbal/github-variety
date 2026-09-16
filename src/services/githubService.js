@@ -55,28 +55,28 @@ ${feedback.description}
     body += `
 
 **Screenshot:**
-[View screenshot](${screenshotUrl})`;
+![feedback screenshot](${screenshotUrl})`;
   }
 
   return body;
 }
 
 // Uploads a base64-encoded screenshot to the project's repo via the
-// GitHub Contents API. Returns the blob viewer URL for embedding, or
-// null if the upload fails (never throws so issue creation is not
-// blocked).
-// Uses GitHub's blob viewer URL (not raw.githubusercontent.com) because
-// raw URLs require public repo access and 404 on private repos. The
-// blob viewer works for both public and private repos since GitHub
-// handles auth via the viewer's own session. Note: this means the
-// screenshot appears as a clickable link in the issue rather than an
-// inline-embedded thumbnail, since blob viewer URLs don't auto-render
-// as images in markdown.
+// GitHub Contents API. Returns the raw content URL for inline rendering,
+// or null if the upload fails (never throws so issue creation is not
+// blocked). Uses the repo's actual default branch to construct the URL.
 async function uploadScreenshot(project, base64Data, feedbackId) {
   if (!base64Data) { return null; }
   try {
     const app = await getAppInstance();
     const octokit = await app.getInstallationOctokit(Number(project.installationId));
+
+    // Fetch the repo's default branch so the URL always resolves correctly
+    const { data: repoInfo } = await octokit.repos.get({
+      owner: project.githubOwner,
+      repo: project.githubRepo,
+    });
+    const defaultBranch = repoInfo.default_branch || 'main';
 
     await octokit.repos.createOrUpdateFileContents({
       owner: project.githubOwner,
@@ -84,14 +84,11 @@ async function uploadScreenshot(project, base64Data, feedbackId) {
       path: `feedback-screenshots/${feedbackId}.jpg`,
       message: `Add feedback screenshot for ${feedbackId}`,
       content: base64Data,
+      branch: defaultBranch,
     });
 
-    // NOTE: hardcoded branch name "main" below. If a client repo uses
-    // "master" or another default branch, this blob URL will be wrong
-    // (the commit still lands on the correct default branch, but the
-    // linked URL here won't resolve). Revisit if a client repo uses
-    // a non-"main" default branch.
-    return `https://github.com/${project.githubOwner}/${project.githubRepo}/blob/main/feedback-screenshots/${feedbackId}.jpg`;
+    // Return the raw content URL so the image renders inline in the issue body
+    return `https://raw.githubusercontent.com/${project.githubOwner}/${project.githubRepo}/${defaultBranch}/feedback-screenshots/${feedbackId}.jpg`;
   } catch (err) {
     console.error('Failed to upload feedback screenshot:', err);
     return null;

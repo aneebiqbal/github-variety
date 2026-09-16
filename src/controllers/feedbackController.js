@@ -2,15 +2,33 @@ const prisma = require('../utils/prisma');
 const projectService = require('../services/projectService');
 const githubService = require('../services/githubService');
 
+// Input validation limits
+const MAX_TITLE = 200;
+const MAX_DESCRIPTION = 5000;
+const MAX_NAME = 100;
+
 async function submitFeedback(req, res) {
   const { projectKey, title, description, reporterName, pageUrl, userAgent } = req.body;
 
-  if (!projectKey) {
+  if (!projectKey || !projectKey.trim()) {
     return res.status(400).json({ success: false, error: 'projectKey is required' });
   }
 
-  if (!title || !description) {
-    return res.status(400).json({ success: false, error: 'title and description are required' });
+  if (!title || !title.trim()) {
+    return res.status(400).json({ success: false, error: 'title is required' });
+  }
+  if (title.length > MAX_TITLE) {
+    return res.status(400).json({ success: false, error: `title must be ${MAX_TITLE} characters or fewer` });
+  }
+
+  if (!description || !description.trim()) {
+    return res.status(400).json({ success: false, error: 'description is required' });
+  }
+  if (description.length > MAX_DESCRIPTION) {
+    return res.status(400).json({ success: false, error: `description must be ${MAX_DESCRIPTION} characters or fewer` });
+  }
+  if (reporterName && reporterName.length > MAX_NAME) {
+    return res.status(400).json({ success: false, error: `name must be ${MAX_NAME} characters or fewer` });
   }
 
   try {

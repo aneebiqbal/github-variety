@@ -66,7 +66,7 @@
 
   function authHeaders(extra) {
     var h = extra || {};
-    h['x-admin-password'] = token || '';
+    h['x-admin-token'] = token || '';
     h['Content-Type'] = 'application/json';
     return h;
   }

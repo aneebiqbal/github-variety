@@ -1,8 +1,14 @@
-module.exports = function adminAuth(req, res, next) {
-  const provided = req.headers['x-admin-password'];
-  const expected = process.env.ADMIN_PASSWORD;
+const { validateSession } = require('../controllers/projectController');
 
-  if (!expected || provided !== expected) {
+module.exports = async function adminAuth(req, res, next) {
+  const provided = req.headers['x-admin-token'];
+
+  if (!provided) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
+  const valid = await validateSession(provided);
+  if (!valid) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
 

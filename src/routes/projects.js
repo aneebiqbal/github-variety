@@ -3,8 +3,12 @@ const router = express.Router();
 
 const adminAuth = require('../middleware/adminAuth');
 const projectController = require('../controllers/projectController');
+const { createRateLimiter } = require('../utils/rateLimit');
 
-router.post('/verify', projectController.verify);
+// Rate limiter for login attempts: 5 per 5 minutes per IP
+const loginRateLimit = createRateLimiter('login', 5, 300_000);
+
+router.post('/verify', loginRateLimit, projectController.verify);
 
 router.use(adminAuth);
 

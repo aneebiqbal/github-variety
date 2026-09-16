@@ -27,13 +27,34 @@ model Feedback {
   reporterName      String
   title             String
   description       String
-  pageUrl            String
+  pageUrl           String
   screenshotUrl     String?
   userAgent         String
   githubIssueUrl    String?
   githubIssueNumber Int?
   status            FeedbackStatus  @default(PENDING)
   createdAt         DateTime        @default(now())
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  @@index([expiresAt])
+}
+
+model RateLimit {
+  id        String   @id
+  key       String   @unique
+  count     Int      @default(1)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
 }
 
 enum FeedbackStatus {

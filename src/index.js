@@ -31,4 +31,4 @@ app.listen(PORT, () => {
   console.log(`GitHub Variety backend running on port ${PORT}`);
 });
 
-module.exports = { prisma };
+module.exports = app;

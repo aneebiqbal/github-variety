@@ -3,13 +3,8 @@ const router = express.Router();
 
 const adminAuth = require('../middleware/adminAuth');
 const projectController = require('../controllers/projectController');
-const { createRateLimiter } = require('../utils/rateLimit');
 
-// Rate limiter for login attempts: 5 per 5 minutes per IP
-const loginRateLimit = createRateLimiter('login', 5, 300_000);
-
-router.post('/verify', loginRateLimit, projectController.verify);
-
+// All /api/admin routes require a valid session (tenant-scoped by adminAuth).
 router.use(adminAuth);
 
 router.get('/projects', projectController.listProjects);

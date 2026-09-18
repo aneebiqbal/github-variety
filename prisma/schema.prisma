@@ -3,27 +3,64 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Organization {
+  id               String   @id @default(cuid())
+  name             String
+  installationId   String?
+  githubOwner      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  users            User[]
+  projects         Project[]
+
+  // --- Billing placeholders (Phase 5). Reserved, not enforced. ---
+  stripeCustomerId String?  @unique
+  plan             String?
+  planStatus       String?
+
+  @@index([stripeCustomerId])
+}
+
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  passwordHash   String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  sessions       Session[]
+
+  @@index([organizationId])
 }
 
 model Project {
-  id              String      @id @default(cuid())
+  id              String       @id @default(cuid())
   name            String
-  projectKey      String      @unique
+  projectKey      String       @unique
   githubOwner     String
   githubRepo      String
-  installationId  String
-  isActive        Boolean     @default(true)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
   feedbacks       Feedback[]
+
+  @@index([organizationId])
 }
 
 model Feedback {
   id                String          @id @default(cuid())
   projectId         String
-  project           Project         @relation(fields: [projectId], references: [id])
+  project           Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   reporterName      String
   title             String
   description       String
@@ -37,14 +74,19 @@ model Feedback {
 }
 
 model Session {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-  ipAddress String?
-  userAgent String?
+  id             String   @id @default(cuid())
+  token          String   @unique
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  createdAt      DateTime @default(now())
+  expiresAt      DateTime
+  ipAddress      String?
+  userAgent      String?
 
   @@index([expiresAt])
+  @@index([organizationId])
+  @@index([userId])
 }
 
 model RateLimit {

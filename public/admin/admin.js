@@ -12,8 +12,15 @@
   var loginScreen = $('login-screen');
   var dashboardEl = $('dashboard');
   var loginForm = $('login-form');
+  var loginEmail = $('login-email');
   var loginPassword = $('login-password');
   var loginError = $('login-error');
+
+  var signupForm = $('signup-form');
+  var signupOrg = $('signup-org');
+  var signupEmail = $('signup-email');
+  var signupPassword = $('signup-password');
+  var signupError = $('signup-error');
   var logoutBtn = $('logout-btn');
   var addProjectBtn = $('add-project-btn');
   var projectsTbody = $('projects-tbody');
@@ -26,7 +33,6 @@
   var pfKey = $('pf-key');
   var pfOwner = $('pf-owner');
   var pfRepo = $('pf-repo');
-  var pfInstall = $('pf-install');
   var pfActive = $('pf-active');
   var projectError = $('project-error');
 
@@ -153,25 +159,27 @@
   loginForm.addEventListener('submit', async function (e) {
     e.preventDefault();
     loginError.textContent = '';
+    var email = loginEmail.value.trim();
     var pw = loginPassword.value;
-    if (!pw) {
-      loginError.textContent = 'Please enter the admin password.';
+    if (!email || !pw) {
+      loginError.textContent = 'Please enter your email and password.';
       return;
     }
     try {
-      var res = await fetch(apiBase() + '/api/admin/verify', {
+      var res = await fetch(apiBase() + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: pw })
+        body: JSON.stringify({ email: email, password: pw })
       });
       var body = await res.json().catch(function () { return null; });
       if (res.ok && body && body.success && body.token) {
         token = body.token;
         storeToken(token);
+        loginEmail.value = '';
         loginPassword.value = '';
         showDashboard();
       } else {
-        loginError.textContent = (body && body.error) ? body.error : 'Invalid password.';
+        loginError.textContent = (body && body.error) ? body.error : 'Invalid email or password.';
       }
     } catch (err) {
       console.error(err);
@@ -179,12 +187,73 @@
     }
   });
 
+  signupForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    signupError.textContent = '';
+    var orgName = signupOrg.value.trim();
+    var email = signupEmail.value.trim();
+    var pw = signupPassword.value;
+    if (!orgName || !email || !pw) {
+      signupError.textContent = 'All fields are required.';
+      return;
+    }
+    if (pw.length < 8) {
+      signupError.textContent = 'Password must be at least 8 characters.';
+      return;
+    }
+    try {
+      var res = await fetch(apiBase() + '/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orgName: orgName, email: email, password: pw })
+      });
+      var body = await res.json().catch(function () { return null; });
+      if (res.ok && body && body.success && body.token) {
+        token = body.token;
+        storeToken(token);
+        signupOrg.value = '';
+        signupEmail.value = '';
+        signupPassword.value = '';
+        showDashboard();
+      } else {
+        signupError.textContent = (body && body.error) ? body.error : 'Failed to create account.';
+      }
+    } catch (err) {
+      console.error(err);
+      signupError.textContent = 'Network error. Please try again.';
+    }
+  });
+
+  // Toggle between login and signup forms.
+  $('show-signup').addEventListener('click', function (e) {
+    e.preventDefault();
+    loginForm.hidden = true;
+    signupForm.hidden = false;
+    loginError.textContent = '';
+    signupError.textContent = '';
+  });
+  $('show-login').addEventListener('click', function (e) {
+    e.preventDefault();
+    signupForm.hidden = true;
+    loginForm.hidden = false;
+    loginError.textContent = '';
+    signupError.textContent = '';
+  });
+
   logoutBtn.addEventListener('click', function () {
+    // Best-effort server-side invalidation; clears local state regardless.
+    if (token) {
+      fetch(apiBase() + '/api/auth/logout', {
+        method: 'POST',
+        headers: authHeaders(),
+      }).catch(function () {});
+    }
     clearStoredToken();
     token = null;
     projectsCache = [];
     projectsTbody.innerHTML = '';
     showLogin();
+    loginEmail.value = '';
     loginPassword.value = '';
     loginError.textContent = '';
   });
@@ -261,7 +330,6 @@
     pfKey.value = p.projectKey || '';
     pfOwner.value = p.githubOwner || '';
     pfRepo.value = p.githubRepo || '';
-    pfInstall.value = p.installationId || '';
     pfActive.checked = !!p.isActive;
     openModal(projectModal);
   }
@@ -275,12 +343,11 @@
       projectKey: pfKey.value.trim(),
       githubOwner: pfOwner.value.trim(),
       githubRepo: pfRepo.value.trim(),
-      installationId: pfInstall.value.trim(),
       isActive: pfActive.checked
     };
 
     if (!payload.name || !payload.projectKey || !payload.githubOwner ||
-        !payload.githubRepo || !payload.installationId) {
+        !payload.githubRepo) {
       projectError.textContent = 'All fields are required.';
       return;
     }

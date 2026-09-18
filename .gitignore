@@ -9,3 +9,5 @@ test.html
 
 # Throwaway diagnostic scripts (not for version control)
 scripts/check-repo-state.js
+
+.vercel

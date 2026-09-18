@@ -32,7 +32,12 @@ async function submitFeedback(req, res) {
   }
 
   try {
-    const project = await projectService.getProjectByKey(projectKey);
+    // Load the project with its Organization so we can read the org-level
+    // installationId (one installation covers multiple repos under the org).
+    const project = await prisma.project.findUnique({
+      where: { projectKey },
+      include: { organization: true },
+    });
 
     if (!project || !project.isActive) {
       return res.status(404).json({ success: false, error: 'Project not found' });
@@ -55,7 +60,11 @@ async function submitFeedback(req, res) {
       // so githubService.createIssue can upload it before issue creation.
       feedback.screenshot = req.body.screenshot || null;
 
-      const { url, number, screenshotUrl } = await githubService.createIssue(project, feedback);
+      const { url, number, screenshotUrl } = await githubService.createIssue(
+        project,
+        feedback,
+        project.organization.installationId,
+      );
 
       await prisma.feedback.update({
         where: { id: feedback.id },
@@ -73,15 +82,25 @@ async function submitFeedback(req, res) {
         issueUrl: url,
       });
     } catch (err) {
-      console.error('GitHub issue creation failed:', err);
+      // Any failure here — including a null installationId (org not yet wired
+      // to a GitHub App installation) — marks the feedback FAILED and returns
+      // a clean response to the widget. Never an uncaught exception.
+      console.error('GitHub issue creation failed:', err.message);
+
       await prisma.feedback.update({
         where: { id: feedback.id },
         data: { status: 'FAILED' },
       });
 
-      return res.status(500).json({
+      // Surface a distinct message when the org simply has no installation yet,
+      // so the project owner knows to complete setup.
+      const userMessage = err.message.includes('no GitHub App installation')
+        ? 'Feedback received, but this project is not yet connected to GitHub. Please complete the GitHub App installation.'
+        : 'Failed to create ticket. Please try again.';
+
+      return res.status(202).json({
         success: false,
-        error: 'Failed to create ticket. Please try again.',
+        error: userMessage,
       });
     }
   } catch (err) {

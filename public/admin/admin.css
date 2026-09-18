@@ -80,6 +80,9 @@ body {
 .login-subtitle { margin: 0 0 24px; color: var(--gray); font-size: 13px; }
 .login-form { display: flex; flex-direction: column; gap: 10px; text-align: left; }
 .login-error { color: var(--red-text); font-size: 13px; min-height: 18px; }
+.login-switch { margin: 4px 0 0; text-align: center; font-size: 13px; color: var(--gray); }
+.login-switch a { color: var(--dark); text-decoration: none; font-weight: 600; }
+.login-switch a:hover { text-decoration: underline; }
 
 /* ===== Field labels ===== */
 .field-label { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; display: block; }

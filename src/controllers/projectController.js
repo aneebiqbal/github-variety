@@ -1,37 +1,7 @@
-const crypto = require('crypto');
 const projectService = require('../services/projectService');
 const prisma = require('../utils/prisma');
 
 const PROJECT_KEY_REGEX = /^[a-z0-9-]+$/;
-const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-function generateToken() {
-  return crypto.randomBytes(32).toString('hex');
-}
-
-async function createSession(ipAddress, userAgent) {
-  const token = generateToken();
-  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
-  await prisma.session.create({
-    data: { token, expiresAt, ipAddress, userAgent },
-  });
-  return token;
-}
-
-async function validateSession(token) {
-  const session = await prisma.session.findUnique({ where: { token } });
-  if (!session) return false;
-  if (new Date() > session.expiresAt) {
-    // Expired — clean it up
-    await prisma.session.delete({ where: { token } }).catch(() => {});
-    return false;
-  }
-  return true;
-}
-
-async function destroySession(token) {
-  await prisma.session.delete({ where: { token } }).catch(() => {});
-}
 
 // Periodic cleanup of expired sessions (safe to call; idempotent)
 async function cleanupExpiredSessions() {
@@ -52,7 +22,7 @@ async function cleanupRateLimit() {
 
 async function listProjects(req, res) {
   try {
-    const projects = await projectService.getAllProjects();
+    const projects = await projectService.getProjectsByOrg(req.organizationId);
     return res.status(200).json({ success: true, projects });
   } catch (err) {
     console.error('listProjects error:', err.message);
@@ -61,12 +31,12 @@ async function listProjects(req, res) {
 }
 
 async function createProject(req, res) {
-  const { name, projectKey, githubOwner, githubRepo, installationId } = req.body;
+  const { name, projectKey, githubOwner, githubRepo } = req.body;
 
-  if (!name || !projectKey || !githubOwner || !githubRepo || !installationId) {
+  if (!name || !projectKey || !githubOwner || !githubRepo) {
     return res.status(400).json({
       success: false,
-      error: 'All fields are required: name, projectKey, githubOwner, githubRepo, installationId',
+      error: 'All fields are required: name, projectKey, githubOwner, githubRepo',
     });
   }
 
@@ -83,7 +53,7 @@ async function createProject(req, res) {
       projectKey,
       githubOwner,
       githubRepo,
-      installationId,
+      organizationId: req.organizationId,
     });
 
     const widgetSnippet = `<script src="${process.env.BACKEND_URL}/widget.js" data-project="${projectKey}"></script>`;
@@ -99,7 +69,7 @@ async function createProject(req, res) {
 
 async function updateProject(req, res) {
   const { id } = req.params;
-  const { name, projectKey, githubOwner, githubRepo, installationId, isActive } = req.body;
+  const { name, projectKey, githubOwner, githubRepo, isActive } = req.body;
 
   // Only allow specific fields to be updated
   const data = {};
@@ -115,11 +85,15 @@ async function updateProject(req, res) {
   }
   if (githubOwner !== undefined) data.githubOwner = githubOwner;
   if (githubRepo !== undefined) data.githubRepo = githubRepo;
-  if (installationId !== undefined) data.installationId = installationId;
   if (isActive !== undefined) data.isActive = Boolean(isActive);
 
   try {
-    const project = await projectService.updateProject(id, data);
+    const result = await projectService.updateProjectById(id, req.organizationId, data);
+    if (result.count === 0) {
+      return res.status(404).json({ success: false, error: 'Project not found' });
+    }
+    // Fetch the updated project to return it in the response.
+    const project = await projectService.getProjectById(id);
     return res.status(200).json({ success: true, project });
   } catch (err) {
     if (err.code === 'P2002') {
@@ -133,38 +107,27 @@ async function deleteProject(req, res) {
   const { id } = req.params;
 
   try {
-    await projectService.deleteProject(id);
+    const result = await projectService.deleteProjectById(id, req.organizationId);
+    if (result.count === 0) {
+      return res.status(404).json({ success: false, error: 'Project not found' });
+    }
     return res.status(200).json({ success: true, message: 'Project deleted' });
   } catch (err) {
     return res.status(500).json({ success: false, error: 'Failed to delete project' });
   }
 }
 
-async function verify(req, res) {
-  const { password } = req.body;
-
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ success: false, error: 'Invalid password' });
-  }
-
-  const ipAddress = req.ip || req.connection.remoteAddress || null;
-  const userAgent = req.headers['user-agent'] || null;
-  const token = await createSession(ipAddress, userAgent);
-  return res.status(200).json({ success: true, token });
-}
-
-async function invalidateToken(token) {
-  await destroySession(token);
-}
-
 async function listFeedbacks(req, res) {
   const { projectId } = req.params;
 
   try {
-    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    // Confirm the project belongs to the caller's org before returning its feedbacks.
+    const project = await prisma.project.findFirst({
+      where: { id: projectId, organizationId: req.organizationId },
+    });
 
     if (!project) {
-      return res.status(200).json({ success: true, feedbacks: [] });
+      return res.status(404).json({ success: false, error: 'Project not found' });
     }
 
     const feedbacks = await prisma.feedback.findMany({
@@ -193,10 +156,7 @@ module.exports = {
   createProject,
   updateProject,
   deleteProject,
-  verify,
   listFeedbacks,
-  invalidateToken,
-  validateSession,
   cleanupExpiredSessions,
   cleanupRateLimit,
 };

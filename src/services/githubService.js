@@ -61,26 +61,23 @@ ${feedback.description}
   return body;
 }
 
-// Uploads a base64-encoded screenshot to the project's repo via the
-// GitHub Contents API. Returns the raw content URL for inline rendering,
-// or null if the upload fails (never throws so issue creation is not
-// blocked). Uses the repo's actual default branch to construct the URL.
-async function uploadScreenshot(project, base64Data, feedbackId) {
+// Uploads a base64-encoded screenshot to the repo via the GitHub Contents
+// API. Returns the raw content URL for inline rendering, or null if the
+// upload fails (never throws so issue creation is not blocked). Uses the
+// repo's actual default branch to construct the URL.
+async function uploadScreenshot(owner, repo, installationId, base64Data, feedbackId) {
   if (!base64Data) { return null; }
   try {
     const app = await getAppInstance();
-    const octokit = await app.getInstallationOctokit(Number(project.installationId));
+    const octokit = await app.getInstallationOctokit(Number(installationId));
 
     // Fetch the repo's default branch so the URL always resolves correctly
-    const { data: repoInfo } = await octokit.repos.get({
-      owner: project.githubOwner,
-      repo: project.githubRepo,
-    });
+    const { data: repoInfo } = await octokit.repos.get({ owner, repo });
     const defaultBranch = repoInfo.default_branch || 'main';
 
     await octokit.repos.createOrUpdateFileContents({
-      owner: project.githubOwner,
-      repo: project.githubRepo,
+      owner,
+      repo,
       path: `feedback-screenshots/${feedbackId}.jpg`,
       message: `Add feedback screenshot for ${feedbackId}`,
       content: base64Data,
@@ -88,22 +85,36 @@ async function uploadScreenshot(project, base64Data, feedbackId) {
     });
 
     // Return the raw content URL so the image renders inline in the issue body
-    return `https://raw.githubusercontent.com/${project.githubOwner}/${project.githubRepo}/${defaultBranch}/feedback-screenshots/${feedbackId}.jpg`;
+    return `https://raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}/feedback-screenshots/${feedbackId}.jpg`;
   } catch (err) {
     console.error('Failed to upload feedback screenshot:', err);
     return null;
   }
 }
 
-async function createIssue(project, feedback) {
+// Creates a GitHub issue for the feedback. installationId comes from the
+// project's Organization (one installation covers multiple repos). Throws if
+// the org has no installationId yet — the caller catches this and marks the
+// feedback FAILED rather than surfacing an uncaught exception to the widget.
+async function createIssue(project, feedback, installationId) {
+  if (!installationId) {
+    throw new Error('Organization has no GitHub App installation configured');
+  }
+
   const app = await getAppInstance();
-  const octokit = await app.getInstallationOctokit(Number(project.installationId));
+  const octokit = await app.getInstallationOctokit(Number(installationId));
 
   await ensureLabelsExist(octokit, project.githubOwner, project.githubRepo);
 
   let screenshotUrl = null;
   if (feedback.screenshot) {
-    screenshotUrl = await uploadScreenshot(project, feedback.screenshot, feedback.id);
+    screenshotUrl = await uploadScreenshot(
+      project.githubOwner,
+      project.githubRepo,
+      installationId,
+      feedback.screenshot,
+      feedback.id,
+    );
   }
 
   const response = await octokit.issues.create({

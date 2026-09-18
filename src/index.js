@@ -7,6 +7,7 @@ const { PrismaClient } = require('@prisma/client');
 const healthRoute = require('./routes/health');
 const feedbackRoute = require('./routes/feedback');
 const projectsRoute = require('./routes/projects');
+const authRoute = require('./routes/auth');
 
 const app = express();
 const prisma = new PrismaClient();
@@ -24,9 +25,10 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/health', healthRoute);
 app.use('/api/feedback', feedbackRoute);
 app.use('/api/admin', projectsRoute);
+app.use('/api/auth', authRoute);
 
 // Validate required env vars on startup
-const requiredEnv = ['DATABASE_URL', 'GITHUB_APP_ID', 'GITHUB_APP_PRIVATE_KEY'];
+const requiredEnv = ['DATABASE_URL', 'DIRECT_URL', 'GITHUB_APP_ID', 'GITHUB_APP_PRIVATE_KEY'];
 const missing = requiredEnv.filter((key) => !process.env[key]);
 if (missing.length > 0) {
   console.error(`Missing required environment variables: ${missing.join(', ')}`);

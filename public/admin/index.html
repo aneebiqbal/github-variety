@@ -13,11 +13,29 @@
     <div class="login-card">
       <h1 class="brand">GitHub Variety</h1>
       <p class="login-subtitle">Admin Dashboard</p>
+
+      <!-- Login form -->
       <form id="login-form" class="login-form" autocomplete="off">
-        <label for="login-password" class="field-label">Admin Password</label>
-        <input id="login-password" type="password" class="gv-input" placeholder="Enter admin password" required>
+        <label for="login-email" class="field-label">Email</label>
+        <input id="login-email" type="email" class="gv-input" placeholder="you@example.com" required>
+        <label for="login-password" class="field-label">Password</label>
+        <input id="login-password" type="password" class="gv-input" placeholder="Enter password" required>
         <div id="login-error" class="login-error" role="alert"></div>
-        <button type="submit" class="btn btn-primary btn-block">Enter Admin Area</button>
+        <button type="submit" class="btn btn-primary btn-block">Log In</button>
+        <p class="login-switch">No account? <a href="#" id="show-signup">Create one</a></p>
+      </form>
+
+      <!-- Signup form (hidden by default) -->
+      <form id="signup-form" class="login-form" autocomplete="off" hidden>
+        <label for="signup-org" class="field-label">Organization Name</label>
+        <input id="signup-org" type="text" class="gv-input" placeholder="Acme Inc." required>
+        <label for="signup-email" class="field-label">Email</label>
+        <input id="signup-email" type="email" class="gv-input" placeholder="you@example.com" required>
+        <label for="signup-password" class="field-label">Password</label>
+        <input id="signup-password" type="password" class="gv-input" placeholder="At least 8 characters" required minlength="8">
+        <div id="signup-error" class="login-error" role="alert"></div>
+        <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+        <p class="login-switch">Already have an account? <a href="#" id="show-login">Log in</a></p>
       </form>
     </div>
   </section>
@@ -78,10 +96,6 @@
         <div class="field-group">
           <label for="pf-repo" class="field-label">GitHub Repo</label>
           <input id="pf-repo" type="text" class="gv-input" required>
-        </div>
-        <div class="field-group">
-          <label for="pf-install" class="field-label">Installation ID</label>
-          <input id="pf-install" type="text" class="gv-input" required>
         </div>
         <div class="field-group field-toggle">
           <label for="pf-active" class="field-label">Active</label>
